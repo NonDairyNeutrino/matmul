@@ -1,4 +1,8 @@
 // type for functions taking and returning single integers
+#define DEBUG 0
+#if DEBUG
+  #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include "ops.h"
 
@@ -47,8 +51,15 @@ void rand_matrix(int dim, int mat[dim][dim]) {
 void matmul(int dimA, int matA[dimA][dimA], int dimB, int matB[dimB][dimB], int matC[dimA][dimB]) {
   for (int i = 0; i < dimA; i++) {
     for (int j = 0; j < dimB; j++) {
+      matC[i][j] = 0; // make sure to zero out the result matrix
       for (int k = 0; k < dimB; k++) {
         matC[i][j] += matA[i][k] * matB[k][j];
+        #if DEBUG
+          printf("matA[%d][%d] = %d\n", i, k, matA[i][k]);
+          printf("matB[%d][%d] = %d\n", i, k, matA[k][j]);
+          printf("matC[%d][%d] = %d\n", i, j, matC[i][j]);
+          printf("\n");
+        #endif
       }
     }
   }
@@ -56,11 +67,5 @@ void matmul(int dimA, int matA[dimA][dimA], int dimB, int matB[dimB][dimB], int 
 
 // multiply two square matrices and store the result in a given matrix
 void sqrmatmul(int dim, int matA[dim][dim], int matB[dim][dim], int matC[dim][dim]) {
-  for (int i = 0; i < dim; i++) {
-    for (int j = 0; j < dim; j++) {
-      for (int k = 0; k < dim; k++) {
-        matC[i][j] += matA[i][k] * matB[k][j];
-      }
-    }
-  }
+  matmul(dim, matA, dim, matB, matC);
 }
