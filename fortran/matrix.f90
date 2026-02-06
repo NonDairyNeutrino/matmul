@@ -1,5 +1,5 @@
 module matrix
-    use, intrinsic :: iso_fortran_env, only: real32, real64
+    use, intrinsic :: iso_fortran_env, only: f64=>real64
     implicit none
 
     contains
@@ -8,16 +8,14 @@ module matrix
     subroutine print_matrix(matrix)
         implicit none
         ! the dimensions of the matrix are known at call-time
-        real(real64), intent(in) :: matrix(:,:)
-        integer(real64) :: i, j
+        real(f64), intent(in) :: matrix(:,:)
+        integer(f64) :: i, j
 
-        print ("Printing", I1, "rows and", I1, " cols"), size(matrix, 1), size(matrix, 2)
+        print "('Printing ', i1, ' rows and ', i1, ' cols.')", size(matrix, 1), size(matrix, 2)
 
-        rows: do i = 1, size(matrix, 1)
-            cols: do j = 1, size(matrix, 2)
-                print *, matrix(i, j)
-            end do cols
-        end do rows
+        cols: do j = 1, size(matrix, 2)
+            print *, matrix(:, j)
+        end do cols
     end subroutine print_matrix
 
 end module matrix
