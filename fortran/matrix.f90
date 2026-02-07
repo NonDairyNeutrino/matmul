@@ -18,4 +18,23 @@ module matrix
         end do cols
     end subroutine print_matrix
 
+    ! create an identity matrix of the given dimension
+    function id_mat(dim)
+        implicit none
+        integer, intent(in) :: dim
+        real(f64)           :: id_mat(dim, dim)
+        integer             :: i, j
+
+        ! initialize with all zeros
+        id_mat(:,:) = 0.0_f64
+        ! replace diagonal with ones
+        cols: do j = 1, dim
+            rows: do i = 1, dim
+                if (i .eq. j) then
+                    id_mat(i, j) = 1.0_f64
+                end if
+            end do rows
+        end do cols
+    end function id_mat
+
 end module matrix
