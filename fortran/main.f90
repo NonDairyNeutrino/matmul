@@ -7,7 +7,7 @@ program main
     real(f64), allocatable :: id(:,:)
 
     ! get user defined number of rows and columns
-    print *, "Enter two integers:"
+    print '(A)', "Enter an integer:"
     read (*, *) dim
     ! allocate matrix using user defined dimensions
     allocate(id(dim, dim))
