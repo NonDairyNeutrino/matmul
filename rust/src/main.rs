@@ -12,13 +12,28 @@ mod linalg {
         return acc;
     }
 
+    pub fn matvecmul(mat: &Vec<Vec<f64>>, x: &Vec<f64>, y: &mut Vec<f64>) {
+        let nrows: usize = mat.len();
+        for row in 0..nrows {
+            y[row] = dot(&mat[row], x);
+        }
+    }
+
+    fn transpose(mat: &Vec<Vec<f64>>) -> &Vec<Vec<f64>> {
+        todo!()
+    }
+
     pub fn matmul(x: &Vec<Vec<f64>>, y: &Vec<Vec<f64>>, z: &mut Vec<Vec<f64>>) {
         let nrows: usize = x.len();
         let ncols: usize = y.len();
-        for i in 0..nrows {
-            for j in 0..ncols {
-                z[i][j] = dot(&x[i], &y[j]);
-            }
+        // for i in 0..nrows {
+        //     for j in 0..ncols {
+        //         z[i][j] = dot(&x[i], &y[j]);
+        //     }
+        // }
+        let ytran: &Vec<Vec<f64>> = transpose(y);
+        for j in 0..ncols {
+            matvecmul(x, &ytran[j], &mut z[j]);
         }
     }
 }
@@ -26,7 +41,7 @@ mod linalg {
 fn main() {
     use linalg::*;
     let x: Vec<f64> = vec![1.0, 2.0, 3.0];
-    let y: Vec<f64> = vec![1.0, 2.0, 3.0];
+    let mut y: Vec<f64> = vec![0.0, 0.0, 0.0];
     println!("{x:?}.{y:?} = {}", dot(&x, &y));
 
     let a: Vec<Vec<f64>> = vec![
@@ -34,6 +49,9 @@ fn main() {
         vec![0.0, 1.0, 0.0],
         vec![0.0, 0.0, 1.0],
     ];
+
+    matvecmul(&a, &x, &mut y);
+    println!("{a:?}.{x:?} = {y:?}");
 
     let b: Vec<Vec<f64>> = vec![
         vec![1.0, 0.0, 0.0],
