@@ -1,27 +1,30 @@
 // use std::ops::{AddAssign, Mul};
 
-// fn dot<T: Mul + AddAssign>(x: Vec<T>, y: Vec<T>) {
-fn dot(x: &Vec<f64>, y: &Vec<f64>) -> f64 {
-    // assert_eq!(x.len(), y.len())
-    let n: usize = x.len();
-    let mut acc: f64 = 0.0;
-    for i in 0..n {
-        acc += x[i] * y[i];
+mod linalg {
+    // fn dot<T: Mul + AddAssign>(x: Vec<T>, y: Vec<T>) {
+    pub fn dot(x: &Vec<f64>, y: &Vec<f64>) -> f64 {
+        // assert_eq!(x.len(), y.len())
+        let n: usize = x.len();
+        let mut acc: f64 = 0.0;
+        for i in 0..n {
+            acc += x[i] * y[i];
+        }
+        return acc;
     }
-    return acc;
-}
 
-fn matmul(x: &Vec<Vec<f64>>, y: &Vec<Vec<f64>>, z: &mut Vec<Vec<f64>>) {
-    let nrows: usize = x.len();
-    let ncols: usize = y.len();
-    for i in 0..nrows {
-        for j in 0..ncols {
-            z[i][j] = dot(&x[i], &y[j]);
+    pub fn matmul(x: &Vec<Vec<f64>>, y: &Vec<Vec<f64>>, z: &mut Vec<Vec<f64>>) {
+        let nrows: usize = x.len();
+        let ncols: usize = y.len();
+        for i in 0..nrows {
+            for j in 0..ncols {
+                z[i][j] = dot(&x[i], &y[j]);
+            }
         }
     }
 }
 
 fn main() {
+    use linalg::*;
     let x: Vec<f64> = vec![1.0, 2.0, 3.0];
     let y: Vec<f64> = vec![1.0, 2.0, 3.0];
     println!("{x:?}.{y:?} = {}", dot(&x, &y));
