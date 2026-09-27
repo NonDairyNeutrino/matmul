@@ -19,8 +19,14 @@ mod linalg {
         }
     }
 
-    fn transpose(mat: &Vec<Vec<f64>>) -> &Vec<Vec<f64>> {
-        todo!()
+    struct Transpose<'a> {
+        rows: &'a Vec<Vec<f64>>,
+        cols: &'a Vec<f64>,
+    }
+    impl Transpose<'_> {
+        fn new(mat: &Vec<Vec<f64>>) -> Transpose {
+            todo!()
+        }
     }
 
     pub fn matmul(x: &Vec<Vec<f64>>, y: &Vec<Vec<f64>>, z: &mut Vec<Vec<f64>>) {
@@ -31,7 +37,7 @@ mod linalg {
         //         z[i][j] = dot(&x[i], &y[j]);
         //     }
         // }
-        let ytran: &Vec<Vec<f64>> = transpose(y);
+        let ytran: Transpose = Transpose::new(y);
         for j in 0..ncols {
             matvecmul(x, &ytran[j], &mut z[j]);
         }
