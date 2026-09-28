@@ -1,6 +1,8 @@
 // use std::ops::{AddAssign, Mul};
 
 mod linalg {
+    use std::thread;
+
     // Allocates a vector of zeros except for a 1 in a single index
     pub fn sel_vec(dim: usize, p: usize) -> Vec<f64> {
         let mut v: Vec<f64> = Vec::with_capacity(dim);
@@ -65,16 +67,18 @@ mod linalg {
 
         // to work with rows instead of columns we can allocate and reuse only a single vector
         for j in 0..ncols {
-            // set values for the column
-            for i in 0..nrows {
-                bcol[i] = b[i][j];
-            }
-            // use the column in a matrix-vector multiplication
-            matvecmul(a, &bcol, &mut ccol);
-            // set the values of the ouput matrix for the column
-            for i in 0..nrows {
-                c[i][j] = ccol[i];
-            }
+            let handle = thread::spawn(|| {
+                // set values for the column
+                for i in 0..nrows {
+                    bcol[i] = b[i][j];
+                }
+                // use the column in a matrix-vector multiplication
+                matvecmul(a, &bcol, &mut ccol);
+                // set the values of the ouput matrix for the column
+                for i in 0..nrows {
+                    c[i][j] = ccol[i];
+                }
+            })
         }
     }
 }
