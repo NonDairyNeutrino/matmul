@@ -51,17 +51,30 @@ mod linalg {
         }
     }
 
-    pub fn matmul(x: &Vec<Vec<f64>>, y: &Vec<Vec<f64>>, z: &mut Vec<Vec<f64>>) {
-        let nrows: usize = x.len();
-        let ncols: usize = y[0].len();
-        // for i in 0..nrows {
-        //     for j in 0..ncols {
-        //         z[i][j] = dot(&x[i], &y[j]);
-        //     }
-        // }
+    pub fn matmul(a: &Vec<Vec<f64>>, b: &Vec<Vec<f64>>, c: &mut Vec<Vec<f64>>) {
+        let nrows: usize = a.len();
+        let ncols: usize = b[0].len();
+
+        // allocate and initialize input and output column vectors
+        let mut bcol: Vec<f64> = Vec::with_capacity(nrows);
+        let mut ccol: Vec<f64> = Vec::with_capacity(nrows);
+        for _ in 0..nrows {
+            bcol.push(0.0);
+            ccol.push(0.0);
+        }
+
+        // to work with rows instead of columns we can allocate and reuse only a single vector
         for j in 0..ncols {
-            // matvecmul(x, &ytran[j], &mut z[j]);
-            todo!()
+            // set values for the column
+            for i in 0..nrows {
+                bcol[i] = b[i][j];
+            }
+            // use the column in a matrix-vector multiplication
+            matvecmul(a, &bcol, &mut ccol);
+            // set the values of the ouput matrix for the column
+            for i in 0..nrows {
+                c[i][j] = ccol[i];
+            }
         }
     }
 }
@@ -81,5 +94,5 @@ fn main() {
     let mut c: Vec<Vec<f64>> = zero_mat(DIM);
     matmul(&a, &b, &mut c);
 
-    println!("{c:?}");
+    println!("{a:?}.{b:?} = {c:?}");
 }
