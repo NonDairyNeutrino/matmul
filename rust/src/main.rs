@@ -46,19 +46,35 @@ mod linalg {
         return acc;
     }
 
-    pub fn matvecmul<'a, 'b>(
-        mat: &'static Vec<Vec<f64>>,
-        x: &'static Vec<f64>,
-        y: &'static mut Vec<f64>,
-    ) {
+    pub fn matvecmul(mat: &Vec<Vec<f64>>, x: &Vec<f64>, y: &mut Vec<f64>) {
         let nrows: usize = mat.len();
+
         let mut handles: Vec<thread::JoinHandle<()>> = Vec::with_capacity(nrows);
-        for row in 0..nrows {
-            let handle = thread::spawn(|| {
-                y[row] = dot(&mat[row], x);
-            });
+        let num_threads: usize = thread::available_parallelism().unwrap().into();
+        let row_slice_length = nrows / num_threads;
+
+        // partition matrix into collections of slices of the original
+        let mut row_slices = Vec::new();
+        let mut y_slices = Vec::new();
+
+        for i in 0..num_threads {
+            let start: usize = i * row_slice_length;
+            let end: usize = (i + 1) * row_slice_length;
+
+            let row_slice: &[Vec<f64>] = &mat[start..end];
+            row_slices.push(row_slice);
+
+            let y_slice: &[f64] = &y[start..end];
+            y_slices.push(y_slice);
+        }
+
+        // thread over rows slices
+        for t in 0..num_threads {
+            let handle = thread::spawn(|| todo!());
+
             handles.push(handle);
         }
+
         for handle in handles {
             handle.join().unwrap();
         }
