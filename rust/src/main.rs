@@ -46,10 +46,21 @@ mod linalg {
         return acc;
     }
 
-    pub fn matvecmul(mat: &Vec<Vec<f64>>, x: &Vec<f64>, y: &mut Vec<f64>) {
+    pub fn matvecmul<'a, 'b>(
+        mat: &'static Vec<Vec<f64>>,
+        x: &'static Vec<f64>,
+        y: &'static mut Vec<f64>,
+    ) {
         let nrows: usize = mat.len();
+        let mut handles: Vec<thread::JoinHandle<()>> = Vec::with_capacity(nrows);
         for row in 0..nrows {
-            y[row] = dot(&mat[row], x);
+            let handle = thread::spawn(|| {
+                y[row] = dot(&mat[row], x);
+            });
+            handles.push(handle);
+        }
+        for handle in handles {
+            handle.join().unwrap();
         }
     }
 
@@ -67,18 +78,16 @@ mod linalg {
 
         // to work with rows instead of columns we can allocate and reuse only a single vector
         for j in 0..ncols {
-            let handle = thread::spawn(|| {
-                // set values for the column
-                for i in 0..nrows {
-                    bcol[i] = b[i][j];
-                }
-                // use the column in a matrix-vector multiplication
-                matvecmul(a, &bcol, &mut ccol);
-                // set the values of the ouput matrix for the column
-                for i in 0..nrows {
-                    c[i][j] = ccol[i];
-                }
-            })
+            // set values for the column
+            for i in 0..nrows {
+                bcol[i] = b[i][j];
+            }
+            // use the column in a matrix-vector multiplication
+            matvecmul(a, &bcol, &mut ccol);
+            // set the values of the ouput matrix for the column
+            for i in 0..nrows {
+                c[i][j] = ccol[i];
+            }
         }
     }
 }
