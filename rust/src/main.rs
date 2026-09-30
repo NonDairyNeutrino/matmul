@@ -46,32 +46,41 @@ mod linalg {
         return acc;
     }
 
-    pub fn matvecmul(mat: &Vec<Vec<f64>>, x: &Vec<f64>, y: &mut Vec<f64>) {
-        let nrows: usize = mat.len();
-
-        let mut handles: Vec<thread::JoinHandle<()>> = Vec::with_capacity(nrows);
+    fn partition<T>(v: &Vec<T>) -> Vec<&[T]> {
+        let length: usize = v.len();
         let num_threads: usize = thread::available_parallelism().unwrap().into();
-        let row_slice_length = nrows / num_threads;
+        let part_length: usize = length / num_threads;
+        let mut slices: Vec<&[T]> = Vec::with_capacity(num_threads);
 
-        // partition matrix into collections of slices of the original
-        let mut row_slices = Vec::new();
-        let mut y_slices = Vec::new();
-
+        let mut start: usize;
+        let mut end: usize;
+        let mut slice: &[T];
         for i in 0..num_threads {
-            let start: usize = i * row_slice_length;
-            let end: usize = (i + 1) * row_slice_length;
-
-            let row_slice: &[Vec<f64>] = &mat[start..end];
-            row_slices.push(row_slice);
-
-            let y_slice: &[f64] = &y[start..end];
-            y_slices.push(y_slice);
+            start = i * part_length;
+            end = start + part_length;
+            slice = &v[start..end];
+            slices.push(slice);
         }
+        return slices;
+    }
+
+    pub fn matvecmul(mat: &Vec<Vec<f64>>, x: &Vec<f64>, y: &mut Vec<f64>) {
+        let row_slices: Vec<&[Vec<f64>]> = partition(mat);
+        let y_slices: Vec<&[f64]> = partition(y);
 
         // thread over rows slices
-        for t in 0..num_threads {
-            let handle = thread::spawn(|| todo!());
+        let n_threads: usize = row_slices.len();
+        let slice_length: usize = row_slices[0].len();
+        let mut handles: Vec<thread::JoinHandle<()>> = Vec::with_capacity(n_threads);
 
+        for t in 0..n_threads {
+            let row_slice: &[Vec<f64>] = row_slices[t];
+            let mut y_slice: &[f64] = y_slices[t];
+            let handle = thread::spawn(move || {
+                for r in 0..slice_length {
+                    y_slice[r] = dot(&row_slice[r], x);
+                }
+            });
             handles.push(handle);
         }
 
