@@ -71,22 +71,18 @@ mod linalg {
         // thread over rows slices
         let n_threads: usize = row_slices.len();
         let slice_length: usize = row_slices[0].len();
-        let mut handles: Vec<thread::JoinHandle<()>> = Vec::with_capacity(n_threads);
 
-        for t in 0..n_threads {
-            let row_slice: &[Vec<f64>] = row_slices[t];
-            let mut y_slice: &[f64] = y_slices[t];
-            let handle = thread::spawn(move || {
-                for r in 0..slice_length {
-                    y_slice[r] = dot(&row_slice[r], x);
-                }
-            });
-            handles.push(handle);
-        }
-
-        for handle in handles {
-            handle.join().unwrap();
-        }
+        thread::scope(|s| {
+            for t in 0..n_threads {
+                let row_slice: &[Vec<f64>] = row_slices[t];
+                let y_slice/*: &mut [f64]*/ = y_slices[t];
+                s.spawn(|| {
+                    for r in 0..slice_length {
+                        (*y_slice)[r] = dot(&row_slice[r], x);
+                    }
+                });
+            }
+        })
     }
 
     pub fn matmul(a: &Vec<Vec<f64>>, b: &Vec<Vec<f64>>, c: &mut Vec<Vec<f64>>) {
